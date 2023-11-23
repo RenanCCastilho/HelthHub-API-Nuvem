@@ -1,4 +1,8 @@
 # Health Hub
+Nossa solução se baseia em um aplicativo no qual é responsável por controlar dados de saúde e descobrir consumos calórios. 
+Com este aplicativo você monitora os Batimentos cardíacos, Pressão arterial e Nível de Glicose armazenando o registro de todos os dados inseridos além, de uma calculadora de taxa metabólica com indicações para emagrecimento ou aumento de massa. 
+Para monitorar estes dados, o aplicativo conta com um dispositivo IOT através de um arduino que monitora estes dados através de LEDS e conforme os dados são passados para o arduino, os LEDS mudam de cor entre verde, laranja ou vermelho para avaliação da saúde destes dados.
+
 
 # Lista de Endpoints
 ## ***Usuários***
