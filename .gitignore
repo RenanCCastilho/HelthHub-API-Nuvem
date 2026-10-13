@@ -1,0 +1,25 @@
+# Build
+target/
+bin/
+build/
+*.class
+*.jar
+!**/.mvn/wrapper/maven-wrapper.jar
+
+# IDEs
+.idea/
+*.iml
+.vscode/
+.settings/
+.project
+.classpath
+.factorypath
+.sts4-cache/
+
+# Sistema
+.DS_Store
+Thumbs.db
+
+# Variáveis de ambiente
+.env
+*.env

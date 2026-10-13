@@ -1,119 +1,52 @@
-# Health Hub
-Nossa solução se baseia em um aplicativo no qual é responsável por controlar dados de saúde e descobrir consumos calórios. 
-Com este aplicativo você monitora os Batimentos cardíacos, Pressão arterial e Nível de Glicose armazenando o registro de todos os dados inseridos além, de uma calculadora de taxa metabólica com indicações para emagrecimento ou aumento de massa. 
-Para monitorar estes dados, o aplicativo conta com um dispositivo IOT através de um arduino que monitora estes dados através de LEDS e conforme os dados são passados para o arduino, os LEDS mudam de cor entre verde, laranja ou vermelho para avaliação da saúde destes dados.
+# Health Hub API — Deploy em Nuvem
 
+![Java](https://img.shields.io/badge/Java-17-ED8B00?logo=openjdk&logoColor=white)
+![Spring Boot](https://img.shields.io/badge/Spring_Boot-3.1-6DB33F?logo=springboot&logoColor=white)
+![Azure](https://img.shields.io/badge/Azure_App_Service-0078D4?logo=microsoftazure&logoColor=white)
+![GitHub Actions](https://img.shields.io/badge/CI%2FCD-GitHub_Actions-2088FF?logo=githubactions&logoColor=white)
 
-# Lista de Endpoints
-## ***Usuários***
-## GET 
-https://healthhub-web.azurewebsites.net/usuarios
-### Descrição: Consulta a lista de usuários cadastrados.
-### Exemplo de resposta:
-          
-       {
-        "id": 1,
-        "nome": "Nome do Usuário",
-        "email": "usuario@example.com",
-        "senha": "$2a$10$ANAQD5GnQNlJGsyz4JJM5.gzYlNuOmBeP0HLZCKc9V3Srex1anRci"
-      }
+Esta é a versão da [Health Hub API](https://github.com/RenanCCastilho/HealthHub-API) preparada para produção no **Azure App Service**. O deploy é contínuo e feito com **GitHub Actions**.
 
+A cada push na branch `main`, o pipeline compila o projeto com Maven, gera o `.jar` e publica no Web App `HealthHub-web`.
 
-## POST
-https://healthhub-web.azurewebsites.net/usuarios
-### Descrição: Cadastra um novo usuario.
-### Exemplo de solicitação:
+## Pipeline de CI/CD
 
-         {
-          "nome": "Renan Costa",
-          "email": "renan@fiap.com.br",
-          "senha": "senha123"
-          }
+```
+push na main ──► build (Maven, Java 17) ──► artefato .jar ──► deploy no Azure App Service
+```
 
+O workflow está em [`.github/workflows/main_healthhub-web.yml`](.github/workflows/main_healthhub-web.yml). Já o plano de serviço usado no Azure aparece em [`Print_VisaoGeral/`](Print_VisaoGeral).
 
+## Sobre a API
 
+A API controla dados de saúde do usuário: batimentos cardíacos, pressão arterial e nível de glicose. Ela usa Spring Security com HTTP Basic, senhas com hash BCrypt e persistência em Oracle via Spring Data JPA.
 
-## PUT 
-https://healthhub-web.azurewebsites.net/usuarios/1
-### Descrição: Atualiza informações sobre o usuario cadastrado.
-### Exemplo de solicitação:
+| Método | Rota | Descrição |
+|---|---|---|
+| `GET` / `POST` | `/usuarios` | Lista ou cadastra usuários |
+| `GET` / `PUT` / `DELETE` | `/usuarios/{id}` | Consulta, atualiza ou remove usuário |
+| `GET` / `POST` | `/registros-saude` | Lista ou cadastra registros de saúde |
+| `GET` / `PUT` / `DELETE` | `/registros-saude/{id}` | Consulta, atualiza ou remove registro |
+| `GET` | `/registros-saude/search?nomeUsuario=` | Busca paginada por usuário |
 
-      {
-        "nome": "Renan Costa",
-        "email": "castilho@fiap.com.br",
-        "senha": "senha123"
-      }
+## Configuração
 
+As credenciais do banco são lidas de variáveis de ambiente. No Azure, elas ficam em *Configuração → Configurações do aplicativo*.
 
+| Variável | Obrigatória | Descrição |
+|---|---|---|
+| `DB_USERNAME` | sim | Usuário do Oracle |
+| `DB_PASSWORD` | sim | Senha do Oracle |
+| `DB_URL` | não | JDBC URL (padrão: Oracle da FIAP) |
+| `ADMIN_PASSWORD` | não | Senha do usuário `admin` da API |
 
+Para executar localmente:
 
-## DELETE 
-https://healthhub-web.azurewebsites.net/usuarios/1
-### Descrição: Deleta o usuario selecionado. No caso deletará o usuario com o id = 1.
+```bash
+export DB_USERNAME=seu_usuario DB_PASSWORD=sua_senha
+./mvnw spring-boot:run
+```
 
-## ***Registros de Saúde***
-## GET 
-https://healthhub-web.azurewebsites.net/registros-saude
-### Descrição: Consulta a lista de registros de saúde cadastrados. 
-### Exemplo de resposta:
-          
-     {
-        "content": [
-          {
-              "id": 1,
-              "usuario": {
-                  "id": 1,
-                  "nome": "Nome do Usuário",
-                  "email": "usuario@example.com",
-                  "senha": "$2a$10$ANAQD5GnQNlJGsyz4JJM5.gzYlNuOmBeP0HLZCKc9V3Srex1anRci"
-              },
-              "pressaoArterial": 120.0,
-              "batimentosCardiacos": 80,
-              "nivelGlicose": 90.5,
-              "dataRegistro": "2023-11-15"
-          }
-          
+---
 
-## POST
-https://healthhub-web.azurewebsites.net/registros-saude
-### Observação: Colocar id de um usuario ja cadastrado!
-### Descrição: Cadastra um novo registro de saúde
-### Exemplo de solicitação:
-
-       {
-          "usuario": {
-          "id": 1,
-          "nome": "Renan Costa",
-          "email": "castilho@fiap.com.br",
-          "senha": "senha123"
-        },
-          "pressaoArterial": 120.0,
-          "batimentosCardiacos": 80,
-          "nivelGlicose": 90.5,
-          "dataRegistro": "2023-11-16"
-        }
-
-
-
-## PUT 
-https://healthhub-web.azurewebsites.net/registros-saude/1
-### Descrição: Atualiza informações sobre o registro de saúde cadastrado.
-### Exemplo de solicitação:
-
-    {
-        "usuario": {
-        "id": 1,
-        "nome": "Renan Costa",
-        "email": "castilho@fiap.com.br",
-        "senha": "senha123"
-    },
-        "pressaoArterial": 120.0,
-        "batimentosCardiacos": 75,
-        "nivelGlicose": 90.5,
-        "dataRegistro": "2023-11-16"
-    }
-
-
-## DELETE 
-https://healthhub-web.azurewebsites.net/registro-saude/1
-### Descrição: Deleta o usuario selecionado. No caso deletará o registro de saúde com o id = 1.
+Projeto acadêmico desenvolvido na **FIAP** (Global Solution, 2023).
